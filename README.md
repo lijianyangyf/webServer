@@ -4,13 +4,13 @@
 
 ## 主要功能
 
-*   **Web 服务**: 基于 [`axum`](https://github.com/tokio-rs/axum) 框架构建的异步 Web API 服务。
+*   **Web 服务**: 基于 [`axum`](https://github.com/tokio-rs/axum) 框架构建的异步 Web API 服务。通过中间件为每个请求添加唯一的 `x-request-id`，便于日志追踪。
 *   **数据库集成**: 使用 [`sqlx`](https://github.com/launchbadge/sqlx) 与 MySQL 数据库进行高效、安全的异步交互。
-*   **消息队列**: 内置一个简单的内存优先级队列 (`PriorityQueue`)，用于管理待处理的任务。
-*   **任务调度器**: 一个后台任务 (`scheduler`)，定期从队列中获取任务并执行。
+*   **消息队列**: 内置一个基于 `tokio::sync::Mutex` 和 `BinaryHeap` 实现的内存优先级队列 (`PriorityQueue`)，用于管理待处理的任务。
+*   **任务调度器**: 一个后台 `scheduler` 服务，定期从队列中获取任务。根据任务优先级，异步执行耗时任务，并为失败的任务提供有限次数的重试机制。
 *   **配置管理**: 通过 `.env` 文件加载应用配置，方便在不同环境中部署。
-*   **结构化日志**: 集成 [`tracing`](https://github.com/tokio-rs/tracing) 库，提供结构化、可配置的日志输出。
-*   **优雅停机**: 实现 `graceful shutdown`，确保在服务关闭时能够安全地完成正在处理的请求。
+*   **结构化日志**: 集成 [`tracing`](https://github.com/tokio-rs/tracing) 库，提供 JSON 格式的结构化日志输出到控制台和每日滚动的日志文件。
+*   **优雅停机**: 实现 `graceful shutdown`，通过监听 `Ctrl+C` 和 `terminate` 信号，确保在服务关闭时能够安全地完成正在处理的请求和任务。
 
 ## 技术栈
 
