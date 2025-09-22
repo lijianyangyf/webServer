@@ -52,3 +52,57 @@ impl PriorityQueue {
         heap.pop()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn test_task_ordering() {
+        let high_prio_task = Task {
+            id: Uuid::new_v4(),
+            payload: json!({}),
+            priority: 100,
+            retry_count: 0,
+        };
+
+        let low_prio_task = Task {
+            id: Uuid::new_v4(),
+            payload: json!({}),
+            priority: 10,
+            retry_count: 0,
+        };
+
+        assert!(high_prio_task > low_prio_task);
+    }
+
+    #[tokio::test]
+    async fn test_priority_queue_push_pop() {
+        let queue = PriorityQueue::new();
+
+        let low_prio_task = Task {
+            id: Uuid::new_v4(),
+            payload: json!({ "task": "low" }),
+            priority: 10,
+            retry_count: 0,
+        };
+        let high_prio_task = Task {
+            id: Uuid::new_v4(),
+            payload: json!({ "task": "high" }),
+            priority: 100,
+            retry_count: 0,
+        };
+
+        queue.push(low_prio_task.clone()).await;
+        queue.push(high_prio_task.clone()).await;
+
+        let first_popped = queue.pop().await.unwrap();
+        assert_eq!(first_popped.priority, high_prio_task.priority);
+
+        let second_popped = queue.pop().await.unwrap();
+        assert_eq!(second_popped.priority, low_prio_task.priority);
+
+        assert!(queue.pop().await.is_none());
+    }
+}

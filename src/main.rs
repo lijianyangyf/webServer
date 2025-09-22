@@ -19,7 +19,7 @@ use tokio::signal;
 #[tokio::main]
 async fn main() -> Result<(), AppError> {
     let config = Config::from_env()?;
-    let _guard = logging::init_logging(&config)?;
+    let _guard = logging::init_logging(&config, "logs")?;
 
     let db_pool = create_db_pool(&config.database_url).await?;
     let queue = Arc::new(PriorityQueue::new());
